@@ -1,0 +1,126 @@
+{
+  "info": {
+    "name": "EventPulse API",
+    "description": "Collection covering every EventPulse API endpoint. Uses the shared 'EventPulse Environment' for baseUrl and token variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"Password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.token) { pm.environment.set('token', data.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"Password123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        { "name": "List Categories", "request": { "method": "GET", "url": "{{baseUrl}}/api/categories" } },
+        {
+          "name": "Create Category (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/categories",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Music\"\n}" }
+          }
+        },
+        { "name": "Update Category (admin)", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/categories/{{categoryId}}" } },
+        { "name": "Delete Category (admin)", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/categories/{{categoryId}}" } }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "List Events (filter/paginate/sort/search)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/events?city=Cairo&category={{categoryId}}&page=1&limit=10&sortBy=date&order=asc&search=music",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "events"],
+              "query": [
+                { "key": "city", "value": "Cairo" },
+                { "key": "category", "value": "{{categoryId}}" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sortBy", "value": "date" },
+                { "key": "order", "value": "asc" },
+                { "key": "search", "value": "music" }
+              ]
+            }
+          }
+        },
+        { "name": "Get Event", "request": { "method": "GET", "url": "{{baseUrl}}/api/events/{{eventId}}" } },
+        {
+          "name": "Create Event (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["const data = pm.response.json();", "if (data.data && data.data.event) { pm.environment.set('eventId', data.data.event._id); }"] }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/events",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"DevConnect Summit\",\n  \"description\": \"Backend architecture conference\",\n  \"category\": \"{{categoryId}}\",\n  \"city\": \"Cairo\",\n  \"date\": \"2026-09-15T10:00:00.000Z\",\n  \"capacity\": 100\n}"
+            }
+          }
+        },
+        { "name": "Update Event (admin)", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/events/{{eventId}}" } },
+        { "name": "Delete Event (admin)", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/events/{{eventId}}" } },
+        { "name": "Register for Event", "request": { "method": "POST", "url": "{{baseUrl}}/api/events/{{eventId}}/register" } },
+        { "name": "Get Event Announcement History", "request": { "method": "GET", "url": "{{baseUrl}}/api/events/{{eventId}}/messages" } }
+      ]
+    },
+    {
+      "name": "Registrations",
+      "item": [
+        { "name": "My Registrations", "request": { "method": "GET", "url": "{{baseUrl}}/api/registrations/my" } },
+        { "name": "Cancel Registration", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/registrations/{{registrationId}}" } }
+      ]
+    },
+    { "name": "Health", "item": [{ "name": "Health Check", "request": { "method": "GET", "url": "{{baseUrl}}/health" } }] }
+  ]
+}
